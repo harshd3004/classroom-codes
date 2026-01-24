@@ -1,0 +1,24 @@
+{
+  "name": "classroom-codes-backend",
+  "version": "1.0.0",
+  "description": "Backend for Classroom Codes. A real-time classroom dashboard where students instantly broadcast code snippets to a teacher's view. Features a live directory of all active students and one-click code copying. No complex setup—just create a room and code. Built with Node.js, and Socket.io",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harshd3004/classroom-codes.git"
+  },
+  "author": "Harsh Desai",
+  "bugs": {
+    "url": "https://github.com/harshd3004/classroom-codes/issues"
+  },
+  "homepage": "https://github.com/harshd3004/classroom-codes#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.11"
+  }
+}
