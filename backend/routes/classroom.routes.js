@@ -3,7 +3,7 @@ const router = express.Router()
 
 const classroomController = require("../controllers/classroom.controller.js")
 
-router.get("/", classroomController.getHostedClassrooms)
 router.post("/", classroomController.createClassroom)
+router.post("/join", classroomController.joinClassroom)
 
 module.exports = router
