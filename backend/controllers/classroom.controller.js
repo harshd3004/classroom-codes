@@ -2,6 +2,7 @@
 const Classroom = require('../models/Classroom')
 const crypto = require("crypto");
 const User = require("../models/User");
+const { usersBySocket } = require("../sockets/socketStates")
 const mongoose = require("mongoose");
 
 const joinClassroom = async(req, res) => {
@@ -130,6 +131,32 @@ function generateJoinCode() {
   }
 
   return code;
+}
+
+const getParticipants = async(req, res) => {
+  try{
+
+    const {classroomId} = req.params
+  
+    if (!classroomId || !mongoose.Types.ObjectId.isValid(classroomId)) {
+      return res.status(400).json({ error: "Invalid ClassroomId" });
+    }
+  
+    const users = await User.find({ classroomId }).select('_id name role');
+  
+    const participants = users.map(user => ({
+      userId: user._id,
+      name: user.name,
+      role: user.role,
+      online: usersBySocket.has(user._id.toString()),
+      snippetsCount: 0 // Placeholder for future implementation
+    }))
+  
+    res.status(200).json(participants);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
 module.exports = {
