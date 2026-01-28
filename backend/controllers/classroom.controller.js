@@ -5,34 +5,39 @@ const User = require("../models/User");
 const { usersBySocket } = require("../sockets/socketStates")
 const mongoose = require("mongoose");
 
-const joinClassroom = async(req, res) => {
+const joinClassroom = async(req, res, next) => {
   try{
     let { joinCode, participantName, userId } = req.body;
 
     if (!joinCode || (!userId && !participantName)) {
-      return res.status(400).json({ error: "Invalid input" });
+      res.status(400);
+      throw new Error("Invalid input");
     }
 
     if (participantName) {
       participantName = participantName.trim();
       if (participantName.length > 30) {
-        return res.status(400).json({ error: "Name too long" });
+        res.status(400);
+        throw new Error("Participant name too long");
       }
     }
 
     if (userId && !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: "Invalid userId" });
+      res.status(400);
+      throw new Error("Invalid UserId");
     }
 
     joinCode = joinCode.trim().toUpperCase();
     const classroom = await Classroom.findOne({ joinCode });
 
     if (!classroom) {
-      return res.status(404).json({ error: "Classroom not found" });
+      res.status(404);
+      throw new Error("Classroom not found");
     }
 
     if (!classroom.isActive || classroom.expiresAt < new Date()) {
-      return res.status(403).json({ error: "Classroom expired" });
+      res.status(403);
+      throw new Error("Classroom is inactive or expired");
     }
 
     let user;
@@ -61,21 +66,22 @@ const joinClassroom = async(req, res) => {
 
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 }
 
-const createClassroom = async(req, res) => {
+const createClassroom = async(req, res, next) => {
   try {
     const { title, hostName, expiresInHours } = req.body
 
     if (!title || !hostName || !expiresInHours) {
-      return res.status(400).json({ error: "Invalid input" });
+      res.status(400);
+      throw new Error("Invalid input");
     }
 
     if (expiresInHours < 1 || expiresInHours > 24) {
-      return res.status(400).json({ error: "Invalid expiry duration" });
+      res.status(400);
+      throw new Error("Invalid expiry duration");
     }
 
     const expiresAt = new Date(
@@ -99,8 +105,7 @@ const createClassroom = async(req, res) => {
       expiresAt
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 }
 
@@ -133,13 +138,14 @@ function generateJoinCode() {
   return code;
 }
 
-const getParticipants = async(req, res) => {
+const getParticipants = async(req, res, next) => {
   try{
 
     const {classroomId} = req.params
   
     if (!classroomId || !mongoose.Types.ObjectId.isValid(classroomId)) {
-      return res.status(400).json({ error: "Invalid ClassroomId" });
+      res.status(400);
+      throw new Error("Invalid ClassroomId");
     }
   
     const users = await User.find({ classroomId }).select('_id name role');
@@ -154,12 +160,12 @@ const getParticipants = async(req, res) => {
   
     res.status(200).json(participants);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 }
 
 module.exports = {
     joinClassroom,
-    createClassroom
+    createClassroom,
+    getParticipants
   }
