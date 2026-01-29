@@ -1,11 +1,45 @@
-import React from 'react'
+import { useState } from 'react'
+import { createClassroom } from '../api/classroomApi'
+import { useNavigate } from 'react-router-dom'
 
 function CreateClassroom() {
+  const navigate = useNavigate()
 
-  const submitHandler = (e) =>{
+  const [title, setTitle] = useState("")
+  const [hostName, setHostName] = useState("")
+  const [expiresInHours, setExpiresInHours] = useState(1)
+
+  const [alertMessage, setAlertMessage] = useState(false)
+
+  const submitHandler = async (e) =>{
     e.preventDefault()
+    try{
+      const data = {
+        title,
+        hostName,
+        expiresInHours
+      }
+
+      const response = await createClassroom(data)
+      console.log("Classroom created:", response)
+      resetInputs()
+      navigate(`/classroom/${response.classroomId}`)
+
+    }catch(err){
+      setAlertMessage("Error creating classroom. Please try again.")
+      setTimeout(() => {
+        setAlertMessage(false)
+      }, 5000);
+      return
+    }
   }
-  
+
+  const resetInputs = () => {
+    setTitle("")
+    setHostName("")
+    setExpiresInHours(1)
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-sky-50 to-indigo-100 py-14">
       <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-3xl mx-4 sm:mx-8 lg:mx-16 p-6 sm:p-10 lg:p-14 transition-all duration-300 hover:shadow-2xl">
@@ -34,13 +68,15 @@ function CreateClassroom() {
                 htmlFor="classroomTitle"
                 className="block text-sm font-medium tracking-wide text-slate-600 mb-2"
               >
-                Classroom Name
+                Class Name
               </label>
               <input
                 id="classroomTitle"
                 type="text"
                 required
                 placeholder="Enter class name"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 className="
                   w-full px-4 py-2.5 rounded-lg
                   border border-slate-300
@@ -65,6 +101,8 @@ function CreateClassroom() {
                 type="text"
                 required
                 placeholder="Enter your name"
+                value={hostName}
+                onChange = {(e) => setHostName(e.target.value)}
                 className="
                   w-full px-4 py-2.5 rounded-lg
                   border border-slate-300
@@ -90,6 +128,24 @@ function CreateClassroom() {
                 min="1"
                 max="24"
                 placeholder="Enter duration"
+                value={expiresInHours}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === 'e' ||
+                    e.key === 'E' ||
+                    e.key === '+' ||
+                    e.key === '-' ||
+                    e.key === '.'
+                  ) {
+                    e.preventDefault()
+                  }
+                }}
+                onChange={(e) => {
+                  const n = Number(e.target.value)
+                  if (n >= 1 && n <= 24) {
+                    setExpiresInHours(n)
+                  }
+                }}
                 className="
                   w-full px-4 py-2.5 rounded-lg
                   border border-slate-300
@@ -101,12 +157,20 @@ function CreateClassroom() {
               />
             </div>
 
+            {/* Alert */}
+            {alertMessage && (
+              <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                {alertMessage}
+              </div>
+            )}
+
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row justify-end gap-4 mt-10">
 
               <input
                 type="reset"
                 value="Clear"
+                onClick={resetInputs}
                 className="
                   px-8 py-3 rounded-lg
                   border border-slate-300
