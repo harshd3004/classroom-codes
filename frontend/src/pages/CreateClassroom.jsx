@@ -1,19 +1,25 @@
 import { useState } from 'react'
 import { createClassroom } from '../api/classroomApi'
 import { useNavigate } from 'react-router-dom'
+import { useClassroom } from '../contexts/Classroom'
 
 function CreateClassroom() {
   const navigate = useNavigate()
+  const {setClassroomData,setClassroomId} = useClassroom()
 
   const [title, setTitle] = useState("")
   const [hostName, setHostName] = useState("")
   const [expiresInHours, setExpiresInHours] = useState(1)
 
+  const [loading, setLoading] = useState(false)
+
   const [alertMessage, setAlertMessage] = useState(false)
 
   const submitHandler = async (e) =>{
     e.preventDefault()
+    if (loading) return
     try{
+      setLoading(true)
       const data = {
         title,
         hostName,
@@ -22,14 +28,28 @@ function CreateClassroom() {
 
       const response = await createClassroom(data)
       console.log("Classroom created:", response)
-      resetInputs()
-      navigate(`/classroom/${response.classroomId}`)
+
+      setClassroomId(response.classroomId)
+
+      setClassroomData({
+        className:title,
+        joinCode:response.joinCode,
+        expiresAt:response.expiresAt,
+        userId:response.hostUserId,
+        name:hostName,
+        role:"host",
+        hostKey:response.hostKey
+      })
+      navigate(`/classroom/${response.classroomId}`,{replace:true})
 
     }catch(err){
-      setAlertMessage("Error creating classroom. Please try again.")
+      setAlertMessage(err.response?.data?.error || "Something went wrong")
+      console.log(err);
       setTimeout(() => {
         setAlertMessage(false)
       }, 5000);
+    }finally{
+      setLoading(false)
       return
     }
   }
@@ -194,6 +214,7 @@ function CreateClassroom() {
                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600
                   cursor-pointer
                 "
+                disabled={loading}
               />
             </div>
           </form>
