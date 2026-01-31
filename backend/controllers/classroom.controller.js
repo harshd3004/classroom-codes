@@ -104,11 +104,9 @@ const getClassroom = async(req, res, next) => {
     }
 
     res.status(200).json({
-      classroomId,
       classroomName: classroom.title,
       joinCode: classroom.joinCode,
       name: user.name,
-      userId: user._id,
       role: user.role,
       expiresAt: classroom.expiresAt
     });
