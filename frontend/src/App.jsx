@@ -8,39 +8,73 @@ import { ClassroomProvider } from './contexts/Classroom.js'
 
 function App() {
 
+  //classroom context states & methods-----------------------
   const [classroomId, setClassroomId] = useState(null)
+  const [userId, setUserId] = useState(null)
+  const [hostKey, setHostKey] = useState(null)
   const [classroomData, setClassroomData] = useState(null)
+  //---------------------------------------------------------
 
   //data persistence-localstorage
   //writing data to local storage
   useEffect(()=>{
-    if(!classroomId) return
-    let classrooms = JSON.parse(localStorage.getItem("classrooms")) || {}
-    classrooms[classroomId] = {
-      userId:classroomData.userId, 
-      expiresAt:classroomData.expiresAt 
-    }
-    if(classroomData.hostKey){
-      classrooms[classroomId].hostKey = classroomData.hostKey
-    }
-    Object.keys(classrooms).forEach((key) => {
-      if(classrooms[key].expiresAt < Date.now()){
-        delete classrooms[key]
-      }
-    })
-    localStorage.setItem("classrooms", JSON.stringify(classrooms))
-  },[classroomId, classroomData])
+    if (!classroomId || !userId || !classroomData?.expiresAt) return
+
+  saveClassroomToStorage({
+    classroomId,
+    userId,
+    expiresAt: classroomData.expiresAt,
+    hostKey
+  })
+  },[classroomId, userId, hostKey])
 
   //loading data from local storage
   useEffect(() => {
-    let classrooms = JSON.parse(localStorage.getItem("classrooms")) || {}
-    if(classrooms[classroomId]){
-      setClassroomData(classrooms[classroomId])
-    }
+    const classroom = getClassroomFromStorage(classroomId)
+    if (!classroom) return
+    setUserId(classroom.userId)
+    setHostKey(classroom.hostKey ?? null)
   },[classroomId])
 
+  //helper functions---------------------------------
+  const getClassroomFromStorage = (classroomId) => {
+  try {
+    const data = JSON.parse(localStorage.getItem("classrooms") || "{}")
+    return data[classroomId] || null
+  } catch {
+    return null
+  }
+}
+
+const saveClassroomToStorage = ({
+  classroomId,
+  userId,
+  expiresAt
+}) => {
+  try {
+    const raw = localStorage.getItem("classrooms")
+    const classrooms = raw ? JSON.parse(raw) : {}
+    const now = Date.now()
+
+    const cleaned = Object.fromEntries(
+      Object.entries(classrooms).filter(
+        ([, v]) => v.expiresAt >= now
+      )
+    )
+
+    cleaned[classroomId] = {
+      userId,
+      expiresAt,
+      ...(hostKey && { hostKey })
+    }
+
+    localStorage.setItem("classrooms", JSON.stringify(cleaned))
+  } catch {}
+}
+
+
   return (
-    <ClassroomProvider value={{classroomId, classroomData, setClassroomId, setClassroomData}}>
+    <ClassroomProvider value={{classroomId, userId, hostKey, classroomData, setClassroomId, setUserId, setHostKey, setClassroomData}}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />

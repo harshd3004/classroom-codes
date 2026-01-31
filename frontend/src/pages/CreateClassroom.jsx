@@ -5,7 +5,7 @@ import { useClassroom } from '../contexts/Classroom'
 
 function CreateClassroom() {
   const navigate = useNavigate()
-  const {setClassroomData,setClassroomId} = useClassroom()
+  const {setClassroomData, setUserId, setHostKey, setClassroomId} = useClassroom()
 
   const [title, setTitle] = useState("")
   const [hostName, setHostName] = useState("")
@@ -30,15 +30,14 @@ function CreateClassroom() {
       console.log("Classroom created:", response)
 
       setClassroomId(response.classroomId)
-
+      setUserId(response.hostUserId)
+      setHostKey(response.hostKey)
       setClassroomData({
         className:title,
         joinCode:response.joinCode,
         expiresAt:response.expiresAt,
-        userId:response.hostUserId,
         name:hostName,
         role:"host",
-        hostKey:response.hostKey
       })
       navigate(`/classroom/${response.classroomId}`,{replace:true})
 

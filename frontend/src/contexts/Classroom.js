@@ -2,6 +2,8 @@ import { createContext, useContext } from "react";
 
 export const ClassroomContext = createContext({
     classroomId : null,
+    userId : null,
+    hostKey : null,
     classroomData : null,
     // {
     //     classroomId:"",
@@ -14,7 +16,9 @@ export const ClassroomContext = createContext({
     //     hostKey:"" //only for hosts
     // }
     setClassroomId : (classroomId) => {},
-    setClassroomData : (classroomData) => {}
+    setClassroomData : (classroomData) => {},
+    setUserId : (userId) => {},
+    setHostKey : (hostKey) => {}
 })
 
 export const ClassroomProvider = ClassroomContext.Provider;

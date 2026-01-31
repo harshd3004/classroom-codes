@@ -10,3 +10,13 @@ export const createClassroom = async (data) => {
         throw error;
     }
 }
+
+export const getClassroomData = async (classroomId, userId) => {
+    try{
+        const response = await api.get(`/classrooms/${classroomId}/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error getting classroom data:", error);
+        throw error;
+    }
+}
