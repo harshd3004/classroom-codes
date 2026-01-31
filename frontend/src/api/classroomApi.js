@@ -20,3 +20,13 @@ export const getClassroomData = async (classroomId, userId) => {
         throw error;
     }
 }
+
+export const getParticipantsList = async (classroomId) => {
+    try{
+        const response = await api.get(`/classrooms/${classroomId}/participants`);
+        return response.data;
+    }catch (error) {
+        console.error("Error getting participants list:", error);
+        throw error;
+    }
+}
