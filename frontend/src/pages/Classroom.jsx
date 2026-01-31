@@ -10,7 +10,7 @@ import { getClassroomData } from '../api/classroomApi';
 function Classroom() {
     const { id } = useParams();
     const [showInvite, setShowInvite] = useState(false);
-    const { classroomId, userId, classroomData, setClassroomId, setClassroomData } = useClassroom();
+    const { classroomId, userId, hostKey, classroomData, setClassroomId, setClassroomData } = useClassroom();
     
     useEffect(() => {
       setClassroomId(id)
@@ -23,14 +23,16 @@ function Classroom() {
         setClassroomData(data)
       })
     },[userId])
+
+    useEffect(() => {
+      if(hostKey && classroomData) setShowInvite(true)
+    },[hostKey, classroomData])
     
   return (
     <>
     
     {showInvite && classroomData?.role === "host" && (
         <InviteModal
-          joinCode={joinCode}
-          expiresAt={expiresAt}
           onClose={() => setShowInvite(false)}
         />
       )} 
