@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const { usersBySocket } = require("../sockets/socketStates")
 const mongoose = require("mongoose");
+const { join } = require('path');
 
 const joinClassroom = async(req, res, next) => {
   try{
@@ -67,6 +68,52 @@ const joinClassroom = async(req, res, next) => {
 
   } catch (err) {
     next(err);
+  }
+}
+
+const getClassroom = async(req, res, next) => {
+  try {
+    const { classroomId, userId } = req.params;
+    
+    if (!classroomId || !mongoose.Types.ObjectId.isValid(classroomId)) {
+      res.status(400);
+      throw new Error("Invalid ClassroomId");
+    }
+
+    if (!userId && !mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400);
+      throw new Error("Invalid UserId");
+    }
+
+    const classroom = await Classroom.findById(classroomId);
+
+    if (!classroom) {
+      res.status(404);
+      throw new Error("Classroom not found");
+    }
+
+    if (!classroom.isActive || classroom.expiresAt < new Date()) {
+      res.status(403);
+      throw new Error("Classroom is inactive or expired");
+    }
+    const user = await User.findOne({ classroomId, _id: userId });
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    res.status(200).json({
+      classroomId,
+      classroomName: classroom.title,
+      joinCode: classroom.joinCode,
+      name: user.name,
+      userId: user._id,
+      role: user.role,
+      expiresAt: classroom.expiresAt
+    });
+  }catch(err){
+    next(err)
   }
 }
 
@@ -167,5 +214,6 @@ const getParticipants = async(req, res, next) => {
 module.exports = {
     joinClassroom,
     createClassroom,
+    getClassroom,
     getParticipants
   }
