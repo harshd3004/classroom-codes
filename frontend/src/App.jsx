@@ -49,7 +49,8 @@ function App() {
 const saveClassroomToStorage = ({
   classroomId,
   userId,
-  expiresAt
+  expiresAt,
+  hostKey
 }) => {
   try {
     const raw = localStorage.getItem("classrooms")
