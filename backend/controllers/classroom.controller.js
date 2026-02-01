@@ -80,7 +80,7 @@ const getClassroom = async(req, res, next) => {
       throw new Error("Invalid ClassroomId");
     }
 
-    if (!userId && !mongoose.Types.ObjectId.isValid(userId)) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       res.status(400);
       throw new Error("Invalid UserId");
     }
