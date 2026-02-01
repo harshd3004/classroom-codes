@@ -218,8 +218,9 @@ const resolveClassroom = async(req, res, next) => {
       res.status(400);
       throw new Error("Invalid input");
     }
-  
-    const classroom = await Classroom.findOne({ joinCode });
+    
+    const code = joinCode.trim().toUpperCase();
+    const classroom = await Classroom.findOne({ joinCode:code });
   
     if (!classroom) {
       res.status(404);
