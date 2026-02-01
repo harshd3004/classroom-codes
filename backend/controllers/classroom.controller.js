@@ -2,7 +2,7 @@
 const Classroom = require('../models/Classroom')
 const crypto = require("crypto");
 const User = require("../models/User");
-const { usersBySocket } = require("../sockets/socketStates")
+const { usersBySocket, socketsByUser } = require("../sockets/socketStates")
 const mongoose = require("mongoose");
 const { join } = require('path');
 
@@ -199,7 +199,7 @@ const getParticipants = async(req, res, next) => {
       userId: user._id,
       name: user.name,
       role: user.role,
-      online: usersBySocket.has(user._id.toString()),
+      online: socketsByUser.has(user._id.toString()),
       snippetsCount: 0 // Placeholder for future implementation
     }))
   
@@ -218,7 +218,7 @@ const resolveClassroom = async(req, res, next) => {
       res.status(400);
       throw new Error("Invalid input");
     }
-    
+
     const code = joinCode.trim().toUpperCase();
     const classroom = await Classroom.findOne({ joinCode:code });
   
