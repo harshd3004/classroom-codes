@@ -23,7 +23,7 @@ export const joinClassroom = async (data) => {
 
 export const getClassroomData = async (classroomId, userId) => {
     try{
-        const response = await api.get(`/classrooms/${classroomId}/${userId}`);
+        const response = await api.get(`/classrooms/${classroomId}/users/${userId}`);
         return response.data;
     } catch (error) {
         console.error("Error getting classroom data:", error);

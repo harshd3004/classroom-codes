@@ -8,6 +8,6 @@ router.post("/join", classroomController.joinClassroom)
 router.post("/resolve", classroomController.resolveClassroom)
 
 router.get("/:classroomId/participants", classroomController.getParticipants)
-router.get("/:classroomId/:userId", classroomController.getClassroom)
+router.get("/:classroomId/users/:userId", classroomController.getClassroom)
 
 module.exports = router
