@@ -209,9 +209,35 @@ const getParticipants = async(req, res, next) => {
   }
 }
 
+const resolveClassroom = async(req, res, next) => {
+  try{
+
+    const { joinCode } = req.body;
+  
+    if (!joinCode) {
+      res.status(400);
+      throw new Error("Invalid input");
+    }
+  
+    const classroom = await Classroom.findOne({ joinCode });
+  
+    if (!classroom) {
+      res.status(404);
+      throw new Error("Classroom not found");
+    }
+  
+    res.status(200).json({
+      classroomId: classroom._id
+    });
+  }catch(err){
+    next(err)
+  }
+}
+
 module.exports = {
     joinClassroom,
     createClassroom,
     getClassroom,
-    getParticipants
+    getParticipants,
+    resolveClassroom
   }
