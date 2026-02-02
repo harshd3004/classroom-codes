@@ -10,14 +10,10 @@ export const SocketProvider = ({children}) => {
     const { classroomId, userId } = useClassroom();
 
     useEffect(() => {
-        console.log("socket",classroomId,userId);
-        
         if (!classroomId || !userId) return;
         if (!socket.connected) {
             socket.connect();
-        }
-        console.log("connecting");
-        
+        }        
         socket.on("connect", () => {
             console.log("socket connected");
         })
