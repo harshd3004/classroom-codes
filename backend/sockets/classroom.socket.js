@@ -22,7 +22,7 @@ module.exports = (io, socket) => {
         socket.to(classroomId).emit("user_joined", { userId, role})
     })
 
-    socket.on("disconnect", () => {
+    socket.on("leave_room", () => {
         const user = usersBySocket.get(socket.id);
         if (!user) return;
 
