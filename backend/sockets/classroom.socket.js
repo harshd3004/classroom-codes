@@ -2,7 +2,7 @@ const { usersBySocket, socketsByUser } = require("./socketStates")
 const Classroom = require("../models/Classroom")
 
 module.exports = (io, socket) => {
-    socket.on("join_room", ({ classroomId, userId, role}) => {
+    socket.on("join_room", ({ classroomId, userId}) => {
         if (!classroomId || !userId) {
             socket.disconnect();
             return;
@@ -16,10 +16,10 @@ module.exports = (io, socket) => {
             io.to(oldSocketId).disconnectSockets(true);
         }
 
-        usersBySocket.set(socket.id, { userId, classroomId, role })
+        usersBySocket.set(socket.id, { userId, classroomId })
         socketsByUser.set(userId, socket.id)
 
-        socket.to(classroomId).emit("user_joined", { userId, role})
+        socket.to(classroomId).emit("user_joined", { userId})
     })
 
     socket.on("leave_room", () => {
