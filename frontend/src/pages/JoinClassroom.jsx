@@ -32,7 +32,7 @@ function JoinClassroom() {
         }
         const response = await joinClassroom(data)
         setClassroomId(response.classroomId)
-        setUserId(response.hostUserId)
+        setUserId(response.userId)
         setClassroomData({
           className:response.className,
           joinCode:response.joinCode,
