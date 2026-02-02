@@ -1,4 +1,4 @@
-import { useParams} from 'react-router-dom'
+import { useParams, useNavigate} from 'react-router-dom'
 import EditorPanel from '../components/EditorPanel';
 import ParticipantList from '../components/ParticipantList';
 import ActivityLog from '../components/ActivityLog';
@@ -14,18 +14,23 @@ function Classroom() {
 
     const [isResizing, setIsResizing] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(320);
+
+    const navigate = useNavigate()
     
     useEffect(() => {
       setClassroomId(id)
-    },[])
+    },[id])
 
     useEffect(() => {
       if (!classroomId || !userId) return
       getClassroomData(classroomId, userId).then(data => {
         if (!data) return
         setClassroomData(data)
+      }).catch(() => {
+        setClassroomData(null)
+        navigate("/join")
       })
-    },[userId])
+    },[userId, classroomId])
 
     useEffect(() => {
       if(hostKey && classroomData) setShowInvite(true)
