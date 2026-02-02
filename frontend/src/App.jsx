@@ -5,6 +5,7 @@ import CreateClassroom from './pages/CreateClassroom.jsx'
 import JoinClassroom from './pages/JoinClassroom.jsx'
 import Classroom from './pages/Classroom.jsx'
 import { ClassroomProvider } from './contexts/Classroom.js'
+import { SocketProvider } from './contexts/Socket.jsx'
 
 function App() {
 
@@ -76,14 +77,16 @@ const saveClassroomToStorage = ({
 
   return (
     <ClassroomProvider value={{classroomId, userId, hostKey, classroomData, setClassroomId, setUserId, setHostKey, setClassroomData}}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/create" element={<CreateClassroom />} />
-          <Route path="/join" element={<JoinClassroom />} />
-          <Route path="/classroom/:id" element={<Classroom />} />
-        </Routes>
-      </BrowserRouter>
+      <SocketProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/create" element={<CreateClassroom />} />
+            <Route path="/join" element={<JoinClassroom />} />
+            <Route path="/classroom/:id" element={<Classroom />} />
+          </Routes>
+        </BrowserRouter>
+      </SocketProvider>
     </ClassroomProvider>
   )
 }
