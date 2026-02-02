@@ -14,6 +14,13 @@ function App() {
   const [userId, setUserId] = useState(null)
   const [hostKey, setHostKey] = useState(null)
   const [classroomData, setClassroomData] = useState(null)
+
+  const clearClassroomContext = () => {
+    setClassroomId(null)
+    setUserId(null)
+    setHostKey(null)
+    setClassroomData(null)
+  }
   //---------------------------------------------------------
 
   //data persistence-localstorage
@@ -76,17 +83,19 @@ const saveClassroomToStorage = ({
 
 
   return (
-    <ClassroomProvider value={{classroomId, userId, hostKey, classroomData, setClassroomId, setUserId, setHostKey, setClassroomData}}>
-      <SocketProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/create" element={<CreateClassroom />} />
-            <Route path="/join" element={<JoinClassroom />} />
-            <Route path="/classroom/:id" element={<Classroom />} />
-          </Routes>
-        </BrowserRouter>
-      </SocketProvider>
+    <ClassroomProvider value={{classroomId, userId, hostKey, classroomData, setClassroomId, setUserId, setHostKey, setClassroomData, clearClassroomContext}}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/create" element={<CreateClassroom />} />
+          <Route path="/join" element={<JoinClassroom />} />
+          <Route path="/classroom/:id" element={
+            <SocketProvider>
+              <Classroom />
+            </SocketProvider>} 
+          />
+        </Routes>
+      </BrowserRouter>
     </ClassroomProvider>
   )
 }

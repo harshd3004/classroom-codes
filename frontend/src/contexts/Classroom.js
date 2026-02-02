@@ -18,7 +18,8 @@ export const ClassroomContext = createContext({
     setClassroomId : (classroomId) => {},
     setClassroomData : (classroomData) => {},
     setUserId : (userId) => {},
-    setHostKey : (hostKey) => {}
+    setHostKey : (hostKey) => {},
+    clearClassroomContext : () => {}
 })
 
 export const ClassroomProvider = ClassroomContext.Provider;

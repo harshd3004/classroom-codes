@@ -27,7 +27,6 @@ function CreateClassroom() {
       }
 
       const response = await createClassroom(data)
-      console.log("Classroom created:", response)
 
       setClassroomId(response.classroomId)
       setUserId(response.hostUserId)

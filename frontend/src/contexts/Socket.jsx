@@ -10,25 +10,34 @@ export const SocketProvider = ({children}) => {
     const { classroomId, userId } = useClassroom();
 
     useEffect(() => {
-        return () => {
-            socket.disconnect()
-        }
-    },[])
-
-    useEffect(() => {
+        console.log("socket",classroomId,userId);
+        
         if (!classroomId || !userId) return;
-        socket.connect()
+        if (!socket.connected) {
+            socket.connect();
+        }
+        console.log("connecting");
+        
+        socket.on("connect", () => {
+            console.log("socket connected");
+        })
         socket.emit(SOCKET_EVENTS.JOIN_CLASSROOM, { classroomId, userId })
 
         socket.on(SOCKET_EVENTS.USER_JOINED, (user) => {
             console.log("User Joined : ",user);
         })
 
-        return () => {
+        return () => {        
             socket.off(SOCKET_EVENTS.USER_JOINED)
-            socket.disconnect()
         }
     }, [classroomId, userId])
+
+    useEffect(() => {        
+        return () => {
+            socket.off("connect")
+            socket.disconnect();
+        }
+    },[])
 
     return (
         <socketContext.Provider value={socket}>
