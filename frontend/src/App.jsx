@@ -64,6 +64,7 @@ const saveClassroomToStorage = ({
     const raw = localStorage.getItem("classrooms")
     const classrooms = raw ? JSON.parse(raw) : {}
     const now = Date.now()
+    expiresAt = new Date(expiresAt).getTime()
 
     const cleaned = Object.fromEntries(
       Object.entries(classrooms).filter(
