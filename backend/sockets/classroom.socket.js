@@ -1,25 +1,49 @@
 const { usersBySocket, socketsByUser } = require("./socketStates")
-const Classroom = require("../models/Classroom")
+const Classroom = require("../models/Classroom");
+const User = require("../models/User");
 
 module.exports = (io, socket) => {
-    socket.on("join_room", ({ classroomId, userId}) => {
-        if (!classroomId || !userId) {
-            socket.disconnect();
-            return;
-        }
+    socket.on("join_room", async ({ classroomId, userId }) => {
+        try {
+            if (!classroomId || !userId) {
+            socket.disconnect(true)
+            return
+            }
 
-        socket.join(classroomId)
+            // Validate classroom
+            const classroom = await Classroom.findById(classroomId)
+            if (!classroom) {
+            socket.disconnect(true)
+            return
+            }
 
-        // Handle refresh / duplicate sockets
-        const oldSocketId = socketsByUser.get(userId);
+            // Validate user
+            const user = await User.findById(userId).select("_id name role")
+            if (!user) {
+            socket.disconnect(true)
+            return
+            }
+
+            const oldSocketId = socketsByUser.get(userId)
             if (oldSocketId && oldSocketId !== socket.id) {
-            io.to(oldSocketId).disconnectSockets(true);
+            io.to(oldSocketId).disconnectSockets(true)
+            }
+
+            socket.join(classroomId)
+
+            usersBySocket.set(socket.id, { userId, classroomId })
+            socketsByUser.set(userId, socket.id)
+
+            socket.to(classroomId).emit("user_joined", {
+            userId: user._id,
+            name: user.name,
+            role: user.role
+            })
+
+        } catch (err) {
+            console.error("join_room error:", err)
+            socket.disconnect(true)
         }
-
-        usersBySocket.set(socket.id, { userId, classroomId })
-        socketsByUser.set(userId, socket.id)
-
-        socket.to(classroomId).emit("user_joined", { userId})
     })
 
     socket.on("leave_room", () => {
