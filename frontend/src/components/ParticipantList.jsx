@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { getParticipantsList } from '../api/classroomApi';
 import { useClassroom } from '../contexts/Classroom';
+import { useSocket } from '../contexts/Socket';
 import ParticipantRow from './ParticipantRow';
+import { SOCKET_EVENTS } from '../socket/events';
 
 function ParticipantList() {
   const [participants, setParticipants] = useState([]);
 
   const { classroomId } = useClassroom()
+  const socket = useSocket()
 
   useEffect(()=> {
     const fetchParticipants = async () => {
@@ -20,6 +23,25 @@ function ParticipantList() {
     
     if(classroomId) fetchParticipants()
   },[classroomId])
+
+  useEffect(()=> {
+    const handleUserJoined = (user) => {
+      setParticipants( prev => {
+        if(prev.some(p => p.userId === user.userId)) return prev;
+        return [...prev, {
+          ...user,
+          online:true,
+          snippetsCount:0
+        }]
+      })
+    }
+
+    socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
+
+    return ()=>{
+      socket.off(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
+    }
+  },[socket])
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 divide-y">
