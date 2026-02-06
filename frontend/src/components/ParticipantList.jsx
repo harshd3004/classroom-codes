@@ -8,7 +8,7 @@ import { SOCKET_EVENTS } from '../socket/events';
 function ParticipantList() {
   const [participants, setParticipants] = useState([]);
 
-  const { classroomId } = useClassroom()
+  const { classroomId , userId } = useClassroom()
   const socket = useSocket()
 
   useEffect(()=> {
@@ -26,20 +26,39 @@ function ParticipantList() {
 
   useEffect(()=> {
     const handleUserJoined = (user) => {
-      setParticipants( prev => {
-        if(prev.some(p => p.userId === user.userId)) return prev;
-        return [...prev, {
+
+    setParticipants(prev => {
+      const exists = prev.find(p => p.userId === user.userId);
+
+      if (exists) {
+        return prev.map(p =>
+          p.userId === user.userId
+            ? { ...p, online: true }
+            : p
+        );
+      }
+
+      return [
+        ...prev,
+        {
           ...user,
-          online:true,
-          snippetsCount:0
-        }]
-      })
+          online: true,
+          snippetsCount: 0
+        }
+      ];
+    });
+  };
+
+    const handleUserLeft = ({ userId }) => {
+      setParticipants( prev => prev.map(p => p.userId === userId ? {...p, online:false} : p))
     }
 
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
+    socket.on(SOCKET_EVENTS.USER_LEFT, handleUserLeft)
 
     return ()=>{
       socket.off(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
+      socket.off(SOCKET_EVENTS.USER_LEFT, handleUserLeft)
     }
   },[socket])
 
@@ -56,7 +75,7 @@ function ParticipantList() {
             key={p.userId}
             name={p.name}
             role={p.role}
-            online={p.online}
+            online={p.userId === userId ? true : p.online}
             snippetsCount={p.snippetsCount}
           />
         ))}
