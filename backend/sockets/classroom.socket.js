@@ -2,6 +2,20 @@ const { usersBySocket, socketsByUser } = require("./socketStates")
 const Classroom = require("../models/Classroom");
 const User = require("../models/User");
 
+
+//helper functions
+const handleUserLeave = (io, socket)=> {
+    const user = usersBySocket.get(socket.id);
+    if (!user) return;
+
+    usersBySocket.delete(socket.id);
+    socketsByUser.delete(user.userId);
+
+    socket.to(user.classroomId).emit("user_left", {
+        userId: user.userId
+    });
+}
+
 module.exports = (io, socket) => {
     socket.on("join_room", async ({ classroomId, userId }) => {
         try {
@@ -47,15 +61,11 @@ module.exports = (io, socket) => {
     })
 
     socket.on("leave_room", () => {
-        const user = usersBySocket.get(socket.id);
-        if (!user) return;
+        handleUserLeave(io, socket);
+    });
 
-        usersBySocket.delete(socket.id);
-        socketsByUser.delete(user.userId);
-
-        socket.to(user.classroomId).emit("user_left", {
-        userId: user.userId
-        });
+    socket.on("disconnect", () => {
+        handleUserLeave(io, socket);
     });
 
     socket.on("end_class", async({ classroomId, userId}) => {
