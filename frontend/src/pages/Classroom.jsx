@@ -3,6 +3,7 @@ import EditorPanel from '../components/EditorPanel';
 import ParticipantList from '../components/ParticipantList';
 import ActivityLog from '../components/ActivityLog';
 import InviteModal from '../components/InviteModal';
+import ClassBar from '../components/ClassBar';
 import { useEffect, useState } from 'react';
 import { useClassroom } from '../contexts/Classroom';
 import { getClassroomData } from '../api/classroomApi';
@@ -10,6 +11,7 @@ import { getClassroomData } from '../api/classroomApi';
 function Classroom() {
     const { id } = useParams();
     const [showInvite, setShowInvite] = useState(false);
+    const [showSidebar, setShowSidebar] = useState(true);
     const { classroomId, userId, hostKey, classroomData, setClassroomId, setClassroomData } = useClassroom();
 
     const [isResizing, setIsResizing] = useState(false);
@@ -70,28 +72,50 @@ function Classroom() {
           onClose={() => setShowInvite(false)}
         />
       )} 
-    <div className={`flex h-screen bg-slate-100 overflow-hidden ${isResizing ? "select-none" : ""}`}>
-      {/* Editor Panel */}
-      <div className='flex-1 h-full bg-white'>
-        <EditorPanel/>
-      </div>
+    
+    <div className={`h-screen flex flex-col ${isResizing ? "select-none" : ""}`}>
 
-      <div
-        onMouseDown={() => setIsResizing(true)}
-        className="w-1 cursor-col-resize bg-slate-200 hover:bg-slate-300 transition"
+      {/* Top Bar */}
+      <ClassBar
+        title={classroomData?.classroomName}
+        isHost={classroomData?.role === "host"}
+        sidebarVisible={showSidebar}
+        onToggleSidebar={() => setShowSidebar(v => !v)}
+        onLeaveClass={() => navigate("/join")}
+        onEndClass={() => navigate("/join")}
       />
 
-      {/* Sidebar */}
-      <div style={{ width: sidebarWidth }} className='h-full bg-slate-50 border-l border-slate-200 flex flex-col'>
-        {/* Participant List */}
-        <div className='h-3/4 border-b border-slate-200 overflow-y-auto'>
-          <ParticipantList/>
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* Editor */}
+        <div className="flex-1 min-w-0 bg-white">
+          <EditorPanel />
         </div>
 
-        {/* ActivityLog / Chat */}
-        <div className='flex-1 overflow-y-auto'>
-          <ActivityLog/>
+        {showSidebar && (
+          <>
+        {/* Resize Handle  */}
+        <div
+          onMouseDown={() => setIsResizing(true)}
+          className="w-1 cursor-col-resize bg-slate-200 hover:bg-slate-300 transition"
+          />
+
+        {/* Sidebar */}
+        <div
+          style={{ width: sidebarWidth }}
+          className="bg-slate-50 border-l border-slate-200 flex flex-col overflow-hidden"
+          >
+          <div className="flex-1 border-b border-slate-200 overflow-y-auto">
+            <ParticipantList />
+          </div>
+
+          <div className="h-1/3 overflow-y-auto">
+            <ActivityLog />
+          </div>
         </div>
+          </>
+        )}
       </div>
     </div>
     </>
