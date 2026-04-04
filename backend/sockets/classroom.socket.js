@@ -45,7 +45,7 @@ module.exports = (io, socket) => {
 
             socket.join(classroomId)
 
-            usersBySocket.set(socket.id, { userId, classroomId })
+            usersBySocket.set(socket.id, { userId, classroomId, role: user.role })
             socketsByUser.set(userId, socket.id)
 
             socket.to(classroomId).emit("user_joined", {
