@@ -23,6 +23,10 @@ export const SocketProvider = ({children}) => {
             console.log("User Joined : ",user);
         })
 
+        socket.on("disconnect", () => {
+            socket.emit(SOCKET_EVENTS.LEAVE_CLASSROOM, { classroomId, userId })
+            console.log("socket disconnected");
+        })
         return () => {        
             socket.off(SOCKET_EVENTS.USER_JOINED)
         }

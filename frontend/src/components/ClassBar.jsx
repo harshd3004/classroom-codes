@@ -1,13 +1,32 @@
 import { Users, LogOut, Power } from "lucide-react"
+import { useClassroom } from '../contexts/Classroom';
+import { useSocket } from '../contexts/Socket';
+import { useNavigate } from 'react-router-dom'
+import { SOCKET_EVENTS } from "../socket/events";
 
 function ClassBar({
     title,
     isHost,
     sidebarVisible,
-    onToggleSidebar,
-    onLeaveClass,
-    onEndClass
+    onToggleSidebar
 }) {
+
+  const { classroomId, userId, clearClassroomContext } = useClassroom();
+  const socket = useSocket();
+  const navigate = useNavigate()
+
+  const handleLeaveClass = () => {
+    clearClassroomContext();
+    socket.disconnect();
+    navigate("/join");
+  }
+
+  const handleEndClass = () => {
+     socket.emit(SOCKET_EVENTS.END_CLASS, { classroomId, userId })
+     clearClassroomContext();
+     socket.disconnect();
+     navigate("/join");
+  }
 
   return (
     <div className="h-14 px-4 flex items-center justify-between
@@ -32,7 +51,7 @@ function ClassBar({
 
         {/* Leave Class */}
         <button
-          onClick={onLeaveClass}
+          onClick={handleLeaveClass}
           className="flex items-center gap-1 px-3 py-1.5
                      rounded-md text-sm bg-slate-200 hover:bg-slate-300 transition"
         >
@@ -43,7 +62,7 @@ function ClassBar({
         {/* End Class (host only) */}
         {isHost && (
           <button
-            onClick={onEndClass}
+            onClick={handleEndClass}
             className="flex items-center gap-1 px-3 py-1.5
                        rounded-md text-sm bg-red-600 text-white
                        hover:bg-red-700 transition"

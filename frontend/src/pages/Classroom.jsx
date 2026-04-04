@@ -81,8 +81,6 @@ function Classroom() {
         isHost={classroomData?.role === "host"}
         sidebarVisible={showSidebar}
         onToggleSidebar={() => setShowSidebar(v => !v)}
-        onLeaveClass={() => navigate("/join")}
-        onEndClass={() => navigate("/join")}
       />
 
       {/* Main Content */}
