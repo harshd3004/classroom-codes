@@ -1,11 +1,13 @@
-function ParticipantRow({ name, role, online, snippetsCount }) {
+function ParticipantRow({ name, role, online, snippetsCount, onClick, isExpanded }) {
   const isHost = role === "host";
 
   return (
     <div
       className={`flex items-center justify-between px-4 py-2.5 transition
         ${isHost ? "bg-yellow-50 hover:bg-yellow-100" : "hover:bg-gray-100"}
+        ${onClick ? "cursor-pointer" : ""}
       `}
+      onClick={onClick}
     >
       {/* Left: Status + Name + Role */}
       <div className="flex items-center gap-3">
@@ -28,8 +30,9 @@ function ParticipantRow({ name, role, online, snippetsCount }) {
       </div>
 
       {/* Right: Snippet count */}
-      <div className="text-sm font-semibold text-gray-700">
-        {snippetsCount}
+      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+        {isExpanded && <span className="text-xs text-gray-500">Open</span>}
+        <span>{snippetsCount}</span>
       </div>
     </div>
   );
