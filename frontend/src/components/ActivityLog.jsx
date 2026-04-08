@@ -21,7 +21,7 @@ function ActivityLog() {
     socket.on("user_left", (data) => {
       setLogs((prev) => [
         ...prev,
-        `User ${data.userId} left the classroom`
+        `User ${data.name} left the classroom`
       ]);
     });
 
