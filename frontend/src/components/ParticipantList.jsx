@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getParticipantsList } from '../api/classroomApi';
+import { getUserSnippets } from '../api/snippetApi';
 import { useClassroom } from '../contexts/Classroom';
 import { useSocket } from '../contexts/Socket';
 import ParticipantRow from './ParticipantRow';
@@ -7,6 +8,10 @@ import { SOCKET_EVENTS } from '../socket/events';
 
 function ParticipantList() {
   const [participants, setParticipants] = useState([]);
+  const [expandedUserId, setExpandedUserId] = useState(null)
+  const [snippetsByUserId, setSnippetsByUserId] = useState({})
+  const [loadingByUserId, setLoadingByUserId] = useState({})
+  const [errorByUserId, setErrorByUserId] = useState({})
 
   const { classroomId , userId } = useClassroom()
   const socket = useSocket()
@@ -23,6 +28,42 @@ function ParticipantList() {
     
     if(classroomId) fetchParticipants()
   },[classroomId])
+
+  const handleParticipantClick = async (participantId) => {
+    if (!classroomId) return
+
+    const nextExpandedUserId = expandedUserId === participantId ? null : participantId
+    setExpandedUserId(nextExpandedUserId)
+
+    if (!nextExpandedUserId) return
+
+    if (snippetsByUserId[participantId]) return
+
+    setLoadingByUserId(prev => ({ ...prev, [participantId]: true }))
+    setErrorByUserId(prev => ({ ...prev, [participantId]: '' }))
+
+    try {
+      const response = await getUserSnippets(classroomId, participantId)
+      setSnippetsByUserId(prev => ({
+        ...prev,
+        [participantId]: response.snippets || []
+      }))
+    } catch (error) {
+      if (error?.response?.status === 404) {
+        setSnippetsByUserId(prev => ({
+          ...prev,
+          [participantId]: []
+        }))
+      } else {
+        setErrorByUserId(prev => ({
+          ...prev,
+          [participantId]: error?.response?.data?.message || 'Failed to load snippets.'
+        }))
+      }
+    } finally {
+      setLoadingByUserId(prev => ({ ...prev, [participantId]: false }))
+    }
+  }
 
   useEffect(()=> {
     const handleUserJoined = (user) => {
@@ -85,13 +126,55 @@ function ParticipantList() {
 
       <div className="divide-y">
         {participants.map((p) => (
-          <ParticipantRow
-            key={p.userId}
-            name={p.name}
-            role={p.role}
-            online={p.userId === userId ? true : p.online}
-            snippetsCount={p.snippetsCount}
-          />
+          <div key={p.userId}>
+            <ParticipantRow
+              name={p.name}
+              role={p.role}
+              online={p.userId === userId ? true : p.online}
+              snippetsCount={p.snippetsCount}
+              isExpanded={expandedUserId === p.userId}
+              onClick={() => handleParticipantClick(p.userId)}
+            />
+
+            {expandedUserId === p.userId && (
+              <div className="bg-slate-50 border-t border-slate-200 px-4 py-3">
+                {loadingByUserId[p.userId] && (
+                  <div className="text-sm text-slate-500">Loading snippets...</div>
+                )}
+
+                {!loadingByUserId[p.userId] && errorByUserId[p.userId] && (
+                  <div className="text-sm text-rose-600">{errorByUserId[p.userId]}</div>
+                )}
+
+                {!loadingByUserId[p.userId] && !errorByUserId[p.userId] && (
+                  <div className="space-y-2">
+                    {snippetsByUserId[p.userId]?.length ? (
+                      snippetsByUserId[p.userId].map((snippet) => (
+                        <div
+                          key={snippet._id || snippet.id || `${snippet.name}-${snippet.createdAt}`}
+                          className="rounded-md border border-slate-200 bg-white px-3 py-2"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="text-sm font-medium text-slate-900 truncate">
+                              {snippet.name || 'Untitled Snippet'}
+                            </div>
+                            <div className="text-xs text-slate-500 uppercase tracking-wide">
+                              {snippet.language || 'txt'}
+                            </div>
+                          </div>
+                          <div className="mt-1 text-xs text-slate-500">
+                            {snippet.createdAt ? new Date(snippet.createdAt).toLocaleString() : 'Unknown date'}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-slate-500">No snippets found for this user.</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </div>
