@@ -29,14 +29,17 @@ module.exports = (io, socket) => {
                 language
             })
 
-            io.to(classroomId).emit("snippet_submitted", {
-                snippetId: snippet._id,
+            const count = await Snippet.countDocuments({
                 userId: user.userId,
-                name,
-                code,
-                language,
-                createdAt: snippet.createdAt
-            })
+                classroomId
+            });
+
+            io.to(classroomId).emit("snippet_submitted", {
+                user: {
+                    userId: user.userId,
+                    submissionCount: count
+                }
+            });
         }catch (err) {
             console.error(err);
             socket.emit("snippet_error", { error: "Internal server error" });
