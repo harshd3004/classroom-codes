@@ -4,7 +4,7 @@ import { useClassroom } from '../contexts/Classroom'
 import { useSocket } from '../contexts/Socket'
 import { SOCKET_EVENTS } from '../socket/events'
 
-function EditorPanel() {
+function EditorPanel({ selectedSnippet }) {
   const [snippetName, setSnippetName] = useState('Untitled')
   const [code, setCode] = useState('// Write your code here')
   const [language, setLanguage] = useState('javascript')
@@ -13,6 +13,16 @@ function EditorPanel() {
 
   const { classroomId, userId } = useClassroom()
   const socket = useSocket()
+
+  useEffect(() => {
+    if (!selectedSnippet) return
+
+    setSnippetName(selectedSnippet.name || 'Untitled')
+    setCode(selectedSnippet.code || '')
+    if (selectedSnippet.language) {
+      setLanguage(selectedSnippet.language)
+    }
+  }, [selectedSnippet])
 
   useEffect(() => {
     if (!socket) return

@@ -13,6 +13,7 @@ function Classroom() {
     const { id } = useParams();
     const [showInvite, setShowInvite] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
+  const [selectedSnippet, setSelectedSnippet] = useState(null)
     const { classroomId, userId, hostKey, classroomData, setClassroomId, setClassroomData } = useClassroom();
 
     const [isResizing, setIsResizing] = useState(false);
@@ -89,7 +90,7 @@ function Classroom() {
 
         {/* Editor */}
         <div className="flex-1 min-w-0 bg-white">
-          <EditorPanel />
+          <EditorPanel selectedSnippet={selectedSnippet} />
         </div>
 
         {showSidebar && (
@@ -114,7 +115,7 @@ function Classroom() {
 
   {/* Participants */}
   <div className="flex-1 overflow-y-auto">
-    <ParticipantList />
+    <ParticipantList onSnippetSelect={setSelectedSnippet} />
   </div>
 
 </div>

@@ -6,7 +6,7 @@ import { useSocket } from '../contexts/Socket';
 import ParticipantRow from './ParticipantRow';
 import { SOCKET_EVENTS } from '../socket/events';
 
-function ParticipantList() {
+function ParticipantList({ onSnippetSelect }) {
   const [participants, setParticipants] = useState([]);
   const [expandedUserId, setExpandedUserId] = useState(null)
   const [snippetsByUserId, setSnippetsByUserId] = useState({})
@@ -152,7 +152,8 @@ function ParticipantList() {
                       snippetsByUserId[p.userId].map((snippet) => (
                         <div
                           key={snippet._id || snippet.id || `${snippet.name}-${snippet.createdAt}`}
-                          className="rounded-md border border-slate-200 bg-white px-3 py-2"
+                          className="rounded-md border border-slate-200 bg-white px-3 py-2 cursor-pointer hover:bg-slate-50 transition"
+                          onClick={() => onSnippetSelect?.(snippet)}
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="text-sm font-medium text-slate-900 truncate">
