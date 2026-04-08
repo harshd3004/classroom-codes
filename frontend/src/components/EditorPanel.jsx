@@ -10,6 +10,7 @@ function EditorPanel() {
   const [language, setLanguage] = useState('javascript')
   const [statusMessage, setStatusMessage] = useState('')
   const [statusType, setStatusType] = useState('')
+
   const { classroomId, userId } = useClassroom()
   const socket = useSocket()
 
@@ -18,7 +19,7 @@ function EditorPanel() {
 
     const handleSnippetSubmitted = (snippet) => {
       if (snippet?.userId && String(snippet.userId) === String(userId)) {
-        setStatusMessage(`Snippet \"${snippet.name || 'Untitled'}\" submitted successfully.`)
+        setStatusMessage(`Snippet "${snippet.name || 'Untitled'}" submitted successfully.`)
         setStatusType('success')
       }
     }
@@ -37,6 +38,14 @@ function EditorPanel() {
     }
   }, [socket, userId])
 
+  // Auto-hide message
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => setStatusMessage(''), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [statusMessage])
+
   const languageOptions = [
     { value: 'csharp', label: 'C#' },
     { value: 'javascript', label: 'JavaScript' },
@@ -50,7 +59,7 @@ function EditorPanel() {
 
   const submitSnippet = () => {
     if (!socket || !classroomId) {
-      setStatusMessage('Cannot submit snippet without an active classroom connection.')
+      setStatusMessage('No active classroom connection.')
       setStatusType('error')
       return
     }
@@ -66,27 +75,39 @@ function EditorPanel() {
     })
   }
 
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      setStatusMessage('Code copied successfully!')
+      setStatusType('success')
+    } catch {
+      setStatusMessage('Copy failed.')
+      setStatusType('error')
+    }
+  }
+
   return (
-    <div className="h-full flex flex-col rounded-lg overflow-hidden border bg-white shadow-sm">
-      
+    <div className="h-full flex flex-col rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-md">
+
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-slate-100">
-        
-        {/* Left side */}
+      <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b">
+
+        {/* Left */}
         <div className="flex items-center gap-3">
           <input
             type="text"
             value={snippetName}
             onChange={(e) => setSnippetName(e.target.value)}
-            className="px-3 py-1 text-lg font-semibold rounded-md border 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Snippet name..."
+            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
 
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="px-2 py-1 rounded-md border bg-white 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 text-sm rounded-lg border border-slate-300 bg-white 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             {languageOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -96,19 +117,32 @@ function EditorPanel() {
           </select>
         </div>
 
-        {/* Right side */}
-        <button
-          onClick={submitSnippet}
-          className="px-4 py-1.5 rounded-md bg-blue-600 text-white 
-                     hover:bg-blue-700 active:bg-blue-800 transition"
-        >
-          Submit Snippet
-        </button>
+        {/* Right */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={copyCode}
+            className="px-4 py-1.5 text-sm font-medium rounded-lg 
+                       bg-slate-600 text-white hover:bg-slate-700 
+                       active:scale-95 transition"
+          >
+            Copy
+          </button>
+
+          <button
+            onClick={submitSnippet}
+            className="px-4 py-1.5 text-sm font-medium rounded-lg 
+                       bg-blue-600 text-white hover:bg-blue-700 
+                       active:scale-95 transition"
+          >
+            Submit
+          </button>
+        </div>
       </div>
 
+      {/* Status */}
       {statusMessage && (
         <div
-          className={`px-4 py-2 text-sm border-b ${
+          className={`mx-4 mt-2 px-4 py-2 text-sm rounded-lg border ${
             statusType === 'success'
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : statusType === 'error'
@@ -121,7 +155,7 @@ function EditorPanel() {
       )}
 
       {/* Editor */}
-      <div className="flex-1">
+      <div className="flex-1 mt-2">
         <Editor
           height="100%"
           language={language}
