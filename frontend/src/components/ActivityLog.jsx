@@ -21,9 +21,7 @@ function ActivityLog() {
         ...prev,
         `🟢 ${data.name} joined the classroom`,
       ]);
-<<<<<<< HEAD
-=======
-    });
+    };
 
     // When user leaves
     socket.on("user_left", (data) => {
@@ -37,7 +35,6 @@ function ActivityLog() {
     return () => {
       socket.off("user_joined");
       socket.off("user_left");
->>>>>>> e4d3eecf829f2146fcb65820574e4ff5c66849fc
     };
 
     // User left
