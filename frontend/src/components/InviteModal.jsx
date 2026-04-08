@@ -30,12 +30,50 @@ Or, visit the ClassroomCodes website and enter the following join code:
 ${joinCode}`;
 
   const copyToClipboard = async (text) => {
-    try {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      // modern method
       await navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.error("Failed to copy:", err);
+    } else {
+      // fallback method
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
     }
-  };
+
+    showMessage("Copied successfully!", "green");
+
+  } catch (err) {
+    console.error("Failed to copy:", err);
+    showMessage("Failed to copy!", "red");
+  }
+};
+
+// message function
+const showMessage = (text, color) => {
+  const msg = document.createElement("div");
+  msg.textContent = text;
+
+  // Tailwind classes
+  msg.className = `
+    fixed bottom-6 right-6 
+    px-4 py-2 rounded-lg text-white text-sm shadow-lg
+    animate-bounce z-50s
+    ${color === "green" ? "bg-green-600" : "bg-red-600"}
+  `;
+
+  document.body.appendChild(msg);
+
+  setTimeout(() => {
+    msg.remove();
+  }, 2000);
+};
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
