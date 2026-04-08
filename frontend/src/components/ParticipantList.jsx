@@ -53,12 +53,26 @@ function ParticipantList() {
       setParticipants( prev => prev.map(p => p.userId === userId ? {...p, online:false} : p))
     }
 
+    const handleSnippetSubmitted = ({ user }) => {
+      if (!user?.userId) return
+
+      setParticipants(prev =>
+        prev.map(participant =>
+          participant.userId === user.userId
+            ? { ...participant, snippetsCount: user.submissionCount }
+            : participant
+        )
+      )
+    }
+
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
     socket.on(SOCKET_EVENTS.USER_LEFT, handleUserLeft)
+    socket.on(SOCKET_EVENTS.SNIPPET_CREATED, handleSnippetSubmitted)
 
     return ()=>{
       socket.off(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
       socket.off(SOCKET_EVENTS.USER_LEFT, handleUserLeft)
+      socket.off(SOCKET_EVENTS.SNIPPET_CREATED, handleSnippetSubmitted)
     }
   },[socket])
 
