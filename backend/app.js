@@ -6,12 +6,10 @@ const errorHandler = require("./middleware/errorMiddleware")
 const cors = require('cors');
 app.use(cors({ 
     origin: "https://classroom-codes-delta.vercel.app",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
-
-app.options("/*", cors())
 
 //middleware
 app.use(express.json())
