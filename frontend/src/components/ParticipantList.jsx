@@ -94,7 +94,7 @@ function ParticipantList({ onSnippetSelect }) {
       setParticipants( prev => prev.map(p => p.userId === userId ? {...p, online:false} : p))
     }
 
-    const handleSnippetSubmitted = ({ user }) => {
+    const handleSnippetSubmitted = async ({ user }) => {
       if (!user?.userId) return
 
       setParticipants(prev =>
@@ -104,6 +104,26 @@ function ParticipantList({ onSnippetSelect }) {
             : participant
         )
       )
+
+      if (!classroomId) return
+
+      try {
+        const response = await getUserSnippets(classroomId, user.userId)
+        setSnippetsByUserId(prev => ({
+          ...prev,
+          [user.userId]: response.snippets || []
+        }))
+      } catch (error) {
+        if (error?.response?.status === 404) {
+          setSnippetsByUserId(prev => ({
+            ...prev,
+            [user.userId]: []
+          }))
+          return
+        }
+
+        console.error('Error updating snippets list:', error)
+      }
     }
 
     socket.on(SOCKET_EVENTS.USER_JOINED, handleUserJoined)
@@ -115,7 +135,7 @@ function ParticipantList({ onSnippetSelect }) {
       socket.off(SOCKET_EVENTS.USER_LEFT, handleUserLeft)
       socket.off(SOCKET_EVENTS.SNIPPET_CREATED, handleSnippetSubmitted)
     }
-  },[socket])
+  },[socket, classroomId])
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 divide-y">
