@@ -195,13 +195,31 @@ const getParticipants = async(req, res, next) => {
     }
   
     const users = await User.find({ classroomId }).select('_id name role');
-  
+
+    const snippetCounts = await Snippet.aggregate([
+      {
+        $match: {
+          classroomId: new mongoose.Types.ObjectId(classroomId)
+        }
+      },
+      {
+        $group: {
+          _id: "$userId",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const snippetCountByUserId = new Map(
+      snippetCounts.map(item => [item._id.toString(), item.count])
+    );
+
     const participants = users.map(user => ({
       userId: user._id,
       name: user.name,
       role: user.role,
       online: socketsByUser.has(user._id.toString()),
-      snippetsCount: 0 // Placeholder for future implementation
+      snippetsCount: snippetCountByUserId.get(user._id.toString()) || 0
     }))
   
     res.status(200).json(participants);
