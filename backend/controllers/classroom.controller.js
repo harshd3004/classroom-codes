@@ -5,6 +5,7 @@ const User = require("../models/User");
 const { usersBySocket, socketsByUser } = require("../sockets/socketStates")
 const mongoose = require("mongoose");
 const { join } = require('path');
+const Snippet = require('../models/Snippet');
 
 const joinClassroom = async(req, res, next) => {
   try{
@@ -235,10 +236,47 @@ const resolveClassroom = async(req, res, next) => {
   }
 }
 
+const getSnippets = async (req, res, next) => {
+  try {
+    const { classroomId, userId } = req.params;
+
+    // Basic validation
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Build query dynamically
+    const query = { userId };
+
+    if (classroomId) {
+      query.classroomId = classroomId;
+    }
+
+    // Fetch snippets
+    const snippets = await Snippet.find(query)
+      .sort({ createdAt: -1 }) // latest first
+      .lean();
+
+    // Handle empty case
+    if (!snippets.length) {
+      return res.status(404).json({ message: "No snippets found" });
+    }
+
+    res.status(200).json({
+      count: snippets.length,
+      snippets,
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+  
 module.exports = {
     joinClassroom,
     createClassroom,
     getClassroom,
     getParticipants,
+    getSnippets,
     resolveClassroom
   }

@@ -7,6 +7,7 @@ import ClassBar from '../components/ClassBar';
 import { useEffect, useState } from 'react';
 import { useClassroom } from '../contexts/Classroom';
 import { getClassroomData } from '../api/classroomApi';
+import HostControls from '../components/HostControllers';
 
 function Classroom() {
     const { id } = useParams();
@@ -104,9 +105,19 @@ function Classroom() {
           style={{ width: sidebarWidth }}
           className="bg-slate-50 border-l border-slate-200 flex flex-col overflow-hidden"
           >
-          <div className="flex-1 border-b border-slate-200 overflow-y-auto">
-            <ParticipantList />
-          </div>
+          <div className="flex flex-col flex-1 border-b border-slate-200 overflow-hidden">
+
+  {/* Host Controls (only for host) */}
+  {classroomData?.role === "host" && (
+    <HostControls onInvite={() => setShowInvite(true)} />
+  )}
+
+  {/* Participants */}
+  <div className="flex-1 overflow-y-auto">
+    <ParticipantList />
+  </div>
+
+</div>
 
           <div className="h-1/3 overflow-y-auto">
             <ActivityLog />

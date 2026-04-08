@@ -5,4 +5,8 @@ export const SOCKET_EVENTS = {
 
     USER_JOINED: "user_joined",
     USER_LEFT: "user_left",
+
+    SNIPPET_SUBMITTED: "submit_snippet",
+    SNIPPET_CREATED: "snippet_submitted",
+    SNIPPET_ERROR: "snippet_error"
 }
