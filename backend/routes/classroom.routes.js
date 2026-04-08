@@ -9,5 +9,6 @@ router.post("/resolve", classroomController.resolveClassroom)
 
 router.get("/:classroomId/participants", classroomController.getParticipants)
 router.get("/:classroomId/users/:userId", classroomController.getClassroom)
+router.get("/:classroomId/users/:userId/snippets", classroomController.getSnippets)
 
 module.exports = router
